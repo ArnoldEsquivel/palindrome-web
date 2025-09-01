@@ -3,6 +3,7 @@
 import React from 'react';
 import SearchBar from '@/components/search/SearchBar';
 import ResultList from '@/components/results/ResultList';
+import Header from '@/components/layout/Header';
 import { useSearch } from '@/lib/useSearch';
 import type { ProductItem } from '@/lib/types';
 
@@ -47,28 +48,28 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Minimalist Header */}
-      <header className="relative border-b border-border/50 bg-card/80 backdrop-blur-md">
-        {/* Subtle gradient accent */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-accent/3" />
-        
-        <div className="relative container mx-auto px-6 py-8">
-          <div className="text-center space-y-3">
-            {/* Clean title with better typography */}
-            <h1 className="text-3xl lg:text-4xl font-extralight text-foreground tracking-wider">
-              Za-🦆🦆🦆 Tennis Store
+      {/* E-commerce Header */}
+      <Header cartItemCount={2} wishlistItemCount={3} />
+      
+      {/* Hero Section with Title */}
+      <section className="relative border-b border-border/30 bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-12 text-center">
+          <div className="space-y-4">
+            {/* Main title */}
+            <h1 className="text-2xl lg:text-3xl font-light text-foreground tracking-wide">
+              Descuentos especiales para palíndromos
             </h1>
             
-            {/* Minimalist accent line */}
-            <div className="w-20 h-px bg-gradient-to-r from-primary to-accent mx-auto opacity-60" />
-            
-            {/* Simplified description */}
-            <p className="text-muted-foreground text-base lg:text-lg font-light max-w-xl mx-auto">
-              Descuentos especiales para palíndromos
+            {/* Subtitle */}
+            <p className="text-muted-foreground text-sm lg:text-base font-light max-w-2xl mx-auto">
+              Busca productos de tennis y obtén 50% de descuento cuando tu búsqueda sea un palíndromo
             </p>
+            
+            {/* Decorative accent */}
+            <div className="w-16 h-px bg-gradient-to-r from-primary to-accent mx-auto opacity-60" />
           </div>
         </div>
-      </header>
+      </section>
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-10 space-y-10 max-w-5xl" role="main">
