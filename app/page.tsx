@@ -16,6 +16,13 @@ export default function HomePage() {
   // Initialize search hook
   const { q, setQ, data, status, error, search, reset } = useSearch();
 
+  console.log('🎯 [HomePage] Component rendered with:', {
+    q,
+    status,
+    hasData: !!data,
+    dataItemsCount: data?.items?.length
+  });
+
   // Handle product click (for future implementation)
   const handleProductClick = (product: ProductItem) => {
     console.log('Product clicked:', product);
@@ -24,6 +31,7 @@ export default function HomePage() {
 
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: string) => {
+    console.log('🎯 [HomePage] Suggestion clicked:', suggestion);
     setQ(suggestion);
     // Trigger search automatically after setting the query
     setTimeout(() => search(suggestion), 100);
@@ -31,6 +39,7 @@ export default function HomePage() {
 
   // Handle retry
   const handleRetry = () => {
+    console.log('🎯 [HomePage] Retry clicked');
     if (q.trim()) {
       search(q);
     }
@@ -38,24 +47,33 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+      {/* Minimalist Header */}
+      <header className="relative border-b border-border/50 bg-card/80 backdrop-blur-md">
+        {/* Subtle gradient accent */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-accent/3" />
+        
+        <div className="relative container mx-auto px-6 py-8">
+          <div className="text-center space-y-3">
+            {/* Clean title with better typography */}
+            <h1 className="text-3xl lg:text-4xl font-extralight text-foreground tracking-wider">
               Za-🦆🦆🦆 Tennis Store
             </h1>
-            <p className="text-muted-foreground text-lg">
-              Busca productos de tennis con descuentos especiales para palíndromos
+            
+            {/* Minimalist accent line */}
+            <div className="w-20 h-px bg-gradient-to-r from-primary to-accent mx-auto opacity-60" />
+            
+            {/* Simplified description */}
+            <p className="text-muted-foreground text-base lg:text-lg font-light max-w-xl mx-auto">
+              Descuentos especiales para palíndromos
             </p>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 space-y-8" role="main">
+      <main className="container mx-auto px-6 py-10 space-y-10 max-w-5xl" role="main">
         {/* Search Section */}
-        <section aria-labelledby="search-heading">
+        <section aria-labelledby="search-heading" className="space-y-2">
           <h2 id="search-heading" className="sr-only">
             Búsqueda de productos
           </h2>
@@ -66,33 +84,63 @@ export default function HomePage() {
             onSearch={search}
             onClear={reset}
             autoFocus
+            className="mx-auto"
           />
         </section>
 
-        {/* Results Section */}
-        <section aria-labelledby="results-heading">
+        {/* Enhanced Results Section */}
+        <section aria-labelledby="results-heading" className="space-y-6">
           <h2 id="results-heading" className="sr-only">
             Resultados de búsqueda
           </h2>
+          
+          {/* Palindrome Banner (enhanced styling) */}
+          {data?.isPalindrome && status === 'success' && (
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20 p-6 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5" />
+              <div className="relative text-center space-y-2">
+                <div className="inline-flex items-center gap-2 text-primary font-medium">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  ¡Búsqueda palíndromo detectada!
+                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                </div>
+                <p className="text-sm text-muted-foreground font-light">
+                  Disfruta de descuentos especiales en productos seleccionados
+                </p>
+              </div>
+            </div>
+          )}
+          
           <ResultList
             data={data}
             status={status}
             error={error}
-            onRetry={handleRetry}
-            onClearSearch={reset}
             onProductClick={handleProductClick}
             onSuggestionClick={handleSuggestionClick}
+            onRetry={handleRetry}
+            className="w-full"
           />
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 mt-16">
-        <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <p>Za-🦆🦆🦆 Tennis Store - Reto Palíndromo</p>
-          <p className="mt-1">
-            Fase 4: Sistema completo de búsqueda con componentes feedback
-          </p>
+      {/* Enhanced Footer */}
+      <footer className="border-t border-border bg-card/30 backdrop-blur-sm mt-16">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-6 h-0.5 bg-gradient-to-r from-transparent to-primary" />
+              <span className="text-lg font-light text-foreground">Za-🦆🦆🦆 Tennis Store</span>
+              <div className="w-6 h-0.5 bg-gradient-to-r from-accent to-transparent" />
+            </div>
+            <p className="text-sm text-muted-foreground font-light">
+              Reto Palíndromo - Encuentra productos únicos con descuentos especiales
+            </p>
+            <div className="flex items-center justify-center space-x-4 text-xs text-muted-foreground/60">
+              <span>Powered by Next.js</span>
+              <div className="w-1 h-1 bg-muted-foreground/40 rounded-full" />
+              <span>Acueducto</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

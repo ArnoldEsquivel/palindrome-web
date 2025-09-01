@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import type { ProductItem } from "@/lib/types";
@@ -99,7 +100,21 @@ export default function ProductCard({
         />
       )}
 
-      <CardContent className={cn('space-y-3', sizeVariants[size])}>
+      <CardContent className={cn('space-y-4', sizeVariants[size])}>
+        {/* Product Image */}
+        {item.imageUrl && (
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted">
+            <Image
+              src={item.imageUrl}
+              alt={item.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         {/* Product Header */}
         <header className="space-y-1">
           <h3 

@@ -13,13 +13,14 @@ export async function GET() {
     };
 
     return NextResponse.json(health, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
+  } catch (_error) {
+    // Health check failed - return error status
+    return Response.json(
       { 
-        status: 'error', 
+        status: 'error',
         timestamp: new Date().toISOString(),
-        error: 'Health check failed' 
-      }, 
+        message: 'Health check failed'
+      },
       { status: 500 }
     );
   }

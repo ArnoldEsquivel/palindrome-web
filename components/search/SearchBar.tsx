@@ -1,7 +1,5 @@
-"use client";
-
-import React from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -66,6 +64,16 @@ export default function SearchBar({
   autoFocus = false,
 }: SearchBarProps) {
   
+  // Ref to maintain focus on input
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Auto-focus on mount
+  useEffect(() => {
+    if (autoFocus && inputRef.current && !disabled) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus, disabled]);
+  
   /**
    * Handle form submission (Enter key or manual search button)
    */
@@ -81,11 +89,61 @@ export default function SearchBar({
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    console.log('🎯 [SearchBar] Input change detected:', {
+      oldValue: value,
+      newValue,
+      length: newValue.length,
+      isInputFocused: document.activeElement === inputRef.current,
+      activeElement: document.activeElement?.tagName,
+      inputReadOnly: inputRef.current?.readOnly,
+      inputDisabled: inputRef.current?.disabled,
+      eventTarget: e.target === inputRef.current
+    });
     
     // Prevent extremely long queries (frontend validation)
     if (newValue.length <= 255) {
       onChange(newValue);
+      console.log('🎯 [SearchBar] onChange called, new value set');
+    } else {
+      console.log('🎯 [SearchBar] Input rejected: too long');
     }
+  };
+
+  /**
+   * Handle key down events for debugging
+   */
+  const handleKeyDownDebug = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log('🎯 [SearchBar] Key down:', {
+      key: e.key,
+      isInputFocused: document.activeElement === inputRef.current,
+      inputValue: inputRef.current?.value,
+      isDefaultPrevented: e.defaultPrevented,
+      isPropagationStopped: e.isPropagationStopped()
+    });
+    
+    // Call the original key handler
+    handleKeyDown(e);
+  };
+
+  /**
+   * Handle focus events
+   */
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    console.log('🎯 [SearchBar] Input focused:', {
+      activeElement: document.activeElement?.tagName,
+      inputValue: e.target.value
+    });
+  };
+
+  /**
+   * Handle blur events
+   */
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    console.log('🎯 [SearchBar] Input blurred:', {
+      activeElement: document.activeElement?.tagName,
+      inputValue: e.target.value,
+      relatedTarget: e.relatedTarget?.tagName
+    });
   };
 
   /**
@@ -116,114 +174,139 @@ export default function SearchBar({
 
   return (
     <div className={cn("w-full max-w-2xl mx-auto", className)}>
-      {/* Search Form */}
+      {/* Enhanced Search Form */}
       <form
         role="search"
         aria-label="Búsqueda de productos de tennis"
         onSubmit={handleSubmit}
         className="relative"
       >
-        {/* Visible Label */}
+        {/* Visible Label with enhanced styling */}
         <label
           htmlFor="search-input"
-          className="block text-sm font-medium text-foreground mb-2"
+          className="block text-sm font-light text-foreground mb-3 tracking-wide"
         >
           Buscar productos
         </label>
 
-        {/* Input Container */}
-        <div className="relative flex items-center">
-          {/* Search Icon */}
-          <div className="absolute left-3 flex items-center pointer-events-none">
-            <Search 
+        {/* Enhanced Input Container - Now with separated button */}
+        <div className="flex items-center gap-3">
+          {/* Input Container with Icon */}
+          <div className="relative flex-1 group">
+            {/* Search Icon with enhanced colors */}
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
+              <Search 
+                className={cn(
+                  "h-5 w-5 transition-all duration-200",
+                  isLoading 
+                    ? "text-primary animate-pulse" 
+                    : "text-muted-foreground group-focus-within:text-primary"
+                )}
+                aria-hidden="true"
+              />
+            </div>
+
+            {/* Enhanced Search Input */}
+            <Input
+              ref={inputRef}
+              id="search-input"
+              data-testid="search-input"
+              type="search"
+              value={value}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDownDebug}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder={placeholder}
+              disabled={disabled || isLoading}
+              autoFocus={autoFocus}
+              autoComplete="off"
+              spellCheck="false"
+              aria-describedby={helperTextId}
               className={cn(
-                "h-4 w-4 transition-colors",
-                isLoading ? "text-muted-foreground animate-pulse" : "text-muted-foreground"
+                "pl-12 pr-12 py-4 text-base",
+                "bg-card border-border",
+                "focus:border-primary focus:ring-2 focus:ring-primary/20",
+                "transition-all duration-200",
+                "placeholder:text-muted-foreground/60",
+                "hover:border-primary/50",
+                isLoading && "cursor-wait"
               )}
-              aria-hidden="true"
             />
-          </div>
 
-          {/* Search Input */}
-          <Input
-            id="search-input"
-            data-testid="search-input"
-            type="search"
-            value={value}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={disabled || isLoading}
-            autoFocus={autoFocus}
-            autoComplete="off"
-            spellCheck="false"
-            aria-describedby={helperTextId}
-            aria-expanded="false"
-            aria-haspopup="false"
-            className={cn(
-              "pl-10 pr-20 h-12 text-base",
-              "focus:ring-2 focus:ring-primary focus:ring-offset-2",
-              "transition-all duration-200",
-              showClearButton && "pr-20",
-              className
-            )}
-          />
-
-          {/* Action Buttons Container */}
-          <div className="absolute right-2 flex items-center gap-1">
-            {/* Clear Button */}
+            {/* Clear Button (only inside input) */}
             {showClearButton && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleClear}
-                disabled={disabled}
-                aria-label="Limpiar búsqueda"
-                data-testid="clear-button"
-                className="h-8 w-8 p-0 hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-
-            {/* Manual Search Button (optional) */}
-            {onSearch && (
-              <Button
-                type="submit"
-                variant="ghost"
-                size="sm"
-                disabled={disabled || isLoading || !value.trim()}
-                aria-label="Buscar ahora"
-                data-testid="search-button"
-                className="h-8 px-3 text-xs font-medium"
-              >
-                {isLoading ? "..." : "Buscar"}
-              </Button>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClear}
+                  disabled={disabled}
+                  aria-label="Limpiar búsqueda"
+                  data-testid="clear-button"
+                  className="p-0 hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
+
+          {/* Separated Search Button */}
+          {onSearch && (
+            <Button
+              type="submit"
+              variant="default"
+              size="default"
+              disabled={disabled || isLoading || !value.trim()}
+              aria-label="Buscar ahora"
+              data-testid="search-button"
+              className={cn(
+                "h-10 px-6 text-base font-medium whitespace-nowrap",
+                "bg-primary hover:bg-primary/90 text-primary-foreground",
+                "transition-all duration-200",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "shadow-sm hover:shadow-md"
+              )}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Buscando...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Buscar
+                </span>
+              )}
+            </Button>
+          )}
         </div>
 
-        {/* Helper Text */}
+        {/* Enhanced Helper Text */}
         <div
           id={helperTextId}
-          className="mt-2 text-xs text-muted-foreground"
+          className="mt-3 text-sm text-muted-foreground font-light"
           aria-live="polite"
         >
           {isLoading ? (
-            <span className="flex items-center gap-1">
-              <span className="animate-pulse">●</span>
+            <span className="flex items-center gap-2 text-primary">
+              <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
               Buscando productos...
             </span>
           ) : value.length > 0 ? (
-            <span>
+            <span className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-primary rounded-full" />
               {value.length >= 4 
                 ? "Búsqueda automática activa" 
                 : "Escribe al menos 4 caracteres para búsqueda automática"
               }
             </span>
           ) : (
-            <span>
+            <span className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-accent rounded-full" />
               Busca productos de tennis. Usa palíndromos como &quot;abba&quot; para descuentos especiales.
             </span>
           )}

@@ -94,18 +94,23 @@ export default function DiscountBadge({
     <Badge
       variant={getBadgeVariant()}
       className={cn(
-        // Base styles
+        // Base styles with corporate colors
         'absolute z-10',
-        'font-bold uppercase tracking-wide',
-        'shadow-lg',
+        'font-bold uppercase tracking-wider',
+        'shadow-lg shadow-primary/20',
         'animate-in fade-in-0 zoom-in-95 duration-200',
         'transform-gpu', // Hardware acceleration
         
-        // Hover effect
-        'transition-transform hover:scale-105',
+        // Enhanced hover effect
+        'transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-primary/30',
         
-        // High contrast for accessibility
-        'border-2 border-background/20',
+        // Corporate styling - Acueducto Blue
+        'bg-gradient-to-r from-primary to-accent',
+        'text-primary-foreground',
+        'border-2 border-primary/20',
+        
+        // Subtle glow effect
+        'ring-1 ring-primary/30',
         
         // Size variant
         sizeVariants[size],
@@ -113,19 +118,20 @@ export default function DiscountBadge({
         // Position variant
         positionVariants[position],
         
-        // High discount special styling
+        // High discount special styling with enhanced corporate colors
         discountPercentage >= 50 && [
-          'bg-gradient-to-r from-red-500 to-red-600',
-          'text-white',
-          'shadow-red-500/25',
+          'bg-gradient-to-r from-primary via-accent to-primary',
+          'text-primary-foreground',
+          'shadow-primary/40',
+          'ring-2 ring-primary/50',
           'animate-pulse'
         ],
         
-        // Medium discount styling
+        // Medium discount styling with corporate accent
         discountPercentage >= 30 && discountPercentage < 50 && [
-          'bg-gradient-to-r from-orange-500 to-orange-600',
-          'text-white',
-          'shadow-orange-500/25'
+          'bg-gradient-to-r from-accent to-primary',
+          'text-primary-foreground',
+          'shadow-accent/25'
         ],
         
         // Custom styles
