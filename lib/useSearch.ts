@@ -152,16 +152,33 @@ export function useSearch(debounceMs: number = 400, loadInitial: boolean = true)
         setError("");
         console.log('🎯 [useSearch] State updated successfully');
         
-        // Restore focus after state update
+        // Restore focus after state update with multiple attempts
         if (shouldRestoreFocus && focusedElement) {
+          // First attempt: immediate requestAnimationFrame
           requestAnimationFrame(() => {
             if (document.activeElement !== focusedElement) {
-              console.log('🎯 [useSearch] Restoring focus to search input');
+              console.log('🎯 [useSearch] Restoring focus to search input (attempt 1)');
               focusedElement.focus();
             } else {
               console.log('🎯 [useSearch] Focus already on search input, no restore needed');
             }
           });
+          
+          // Second attempt: delayed timeout for cases where confetti or other animations interfere
+          setTimeout(() => {
+            if (document.activeElement !== focusedElement) {
+              console.log('🎯 [useSearch] Restoring focus to search input (attempt 2 - delayed)');
+              focusedElement.focus();
+            }
+          }, 100);
+          
+          // Third attempt: for very slow renders or confetti animations
+          setTimeout(() => {
+            if (document.activeElement !== focusedElement) {
+              console.log('🎯 [useSearch] Restoring focus to search input (attempt 3 - final)');
+              focusedElement.focus();
+            }
+          }, 500);
         }
       } else {
         console.log('🎯 [useSearch] Request was aborted, not updating state');
@@ -211,14 +228,23 @@ export function useSearch(debounceMs: number = 400, loadInitial: boolean = true)
         setData(null);
         console.log('🎯 [useSearch] Error state set:', errorMessage);
         
-        // Restore focus even on error
+        // Restore focus even on error with multiple attempts
         if (shouldRestoreFocus && focusedElement) {
+          // First attempt: immediate requestAnimationFrame
           requestAnimationFrame(() => {
             if (document.activeElement !== focusedElement) {
-              console.log('🎯 [useSearch] Restoring focus to search input after error');
+              console.log('🎯 [useSearch] Restoring focus to search input after error (attempt 1)');
               focusedElement.focus();
             }
           });
+          
+          // Second attempt: delayed timeout for cases where error UI interferes
+          setTimeout(() => {
+            if (document.activeElement !== focusedElement) {
+              console.log('🎯 [useSearch] Restoring focus to search input after error (attempt 2 - delayed)');
+              focusedElement.focus();
+            }
+          }, 100);
         }
       } else {
         console.log('🎯 [useSearch] Error occurred but request was aborted, ignoring');
