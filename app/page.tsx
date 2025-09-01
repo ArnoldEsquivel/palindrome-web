@@ -94,22 +94,6 @@ export default function HomePage() {
             Resultados de búsqueda
           </h2>
           
-          {/* Palindrome Banner (enhanced styling) */}
-          {data?.isPalindrome && status === 'success' && (
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20 p-6 backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5" />
-              <div className="relative text-center space-y-2">
-                <div className="inline-flex items-center gap-2 text-primary font-medium">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  ¡Búsqueda palíndromo detectada!
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                </div>
-                <p className="text-sm text-muted-foreground font-light">
-                  Disfruta de descuentos especiales en productos seleccionados
-                </p>
-              </div>
-            </div>
-          )}
           
           <ResultList
             data={data}
