@@ -12,6 +12,8 @@ describe('Phase 4 Simple Integration', () => {
 
   it('should allow typing in search input', () => {
     cy.get('[data-testid="search-input"]').should('be.visible');
+    // Wait for app to fully load before interacting
+    cy.wait(3000);
     cy.get('[data-testid="search-input"]').type('test');
     cy.get('[data-testid="search-input"]').should('have.value', 'test');
   });

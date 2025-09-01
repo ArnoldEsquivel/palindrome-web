@@ -25,6 +25,7 @@ describe('Basic Accessibility Tests', () => {
   });
 
   it('should perform basic search', () => {
+    cy.wait(3000);
     cy.get('[data-testid="search-input"]').type('test');
     cy.get('[data-testid="search-button"]').click();
     cy.wait(1000);

@@ -8,6 +8,9 @@ describe('Phase 4 Basic Integration', () => {
     cy.get('[data-testid="search-input"]').should('be.visible');
     cy.get('[data-testid="search-input"]').should('have.attr', 'placeholder', 'Busca productos de tennis...');
     
+    // Wait for the app to fully load
+    cy.wait(3000);
+    
     // Perform search
     cy.get('[data-testid="search-input"]').type('tennis');
     cy.get('[data-testid="search-button"]').click();
@@ -34,6 +37,9 @@ describe('Phase 4 Basic Integration', () => {
   
   it('should test palindrome detection', () => {
     cy.visit('/');
+    
+    // Wait for the app to fully load
+    cy.wait(3000);
     
     // Search for a palindrome
     cy.get('[data-testid="search-input"]').type('level');

@@ -11,11 +11,15 @@ describe('Phase 5 Simple End-to-End', () => {
   });
 
   it('should perform basic search', () => {
+    // Wait for app to fully load
+    cy.wait(3000);
     cy.get('[data-testid="search-input"]').type('tennis');
     cy.get('button').contains('Buscar').click();
   });
 
   it('should display search results or loading state', () => {
+    // Wait for app to fully load
+    cy.wait(3000);
     cy.get('[data-testid="search-input"]').type('racecar');
     cy.get('button').contains('Buscar').click();
     // Should show something after search
