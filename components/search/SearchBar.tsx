@@ -67,12 +67,44 @@ export default function SearchBar({
   // Ref to maintain focus on input
   const inputRef = useRef<HTMLInputElement>(null);
   
+  // Track if user is actively typing to maintain focus
+  const isUserTypingRef = useRef(false);
+  const lastUserInteractionRef = useRef(Date.now());
+  
   // Auto-focus on mount
   useEffect(() => {
     if (autoFocus && inputRef.current && !disabled) {
       inputRef.current.focus();
     }
   }, [autoFocus, disabled]);
+  
+  // Aggressive focus preservation during loading/search operations
+  useEffect(() => {
+    if (!inputRef.current || disabled) return;
+    
+    const checkAndRestoreFocus = () => {
+      // Only restore focus if user was recently typing (within last 2 seconds)
+      const timeSinceLastInteraction = Date.now() - lastUserInteractionRef.current;
+      const shouldMaintainFocus = isUserTypingRef.current && timeSinceLastInteraction < 2000;
+      
+      if (shouldMaintainFocus && document.activeElement !== inputRef.current) {
+        console.log('🎯 [SearchBar] Focus lost during search, restoring...');
+        inputRef.current?.focus();
+      }
+    };
+    
+    // Check focus every 100ms during loading
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isLoading) {
+      intervalId = setInterval(checkAndRestoreFocus, 100);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isLoading, disabled]);
   
   /**
    * Handle form submission (Enter key or manual search button)
@@ -89,6 +121,11 @@ export default function SearchBar({
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    
+    // Mark user as actively typing
+    isUserTypingRef.current = true;
+    lastUserInteractionRef.current = Date.now();
+    
     console.log('🎯 [SearchBar] Input change detected:', {
       oldValue: value,
       newValue,
@@ -113,6 +150,10 @@ export default function SearchBar({
    * Handle key down events for debugging
    */
   const handleKeyDownDebug = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Mark user as actively typing
+    isUserTypingRef.current = true;
+    lastUserInteractionRef.current = Date.now();
+    
     console.log('🎯 [SearchBar] Key down:', {
       key: e.key,
       isInputFocused: document.activeElement === inputRef.current,
@@ -129,6 +170,10 @@ export default function SearchBar({
    * Handle focus events
    */
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Mark user as actively engaging with the input
+    isUserTypingRef.current = true;
+    lastUserInteractionRef.current = Date.now();
+    
     console.log('🎯 [SearchBar] Input focused:', {
       activeElement: document.activeElement?.tagName,
       inputValue: e.target.value
@@ -139,6 +184,11 @@ export default function SearchBar({
    * Handle blur events
    */
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Stop tracking user typing after blur, but with a small delay
+    setTimeout(() => {
+      isUserTypingRef.current = false;
+    }, 500);
+    
     console.log('🎯 [SearchBar] Input blurred:', {
       activeElement: document.activeElement?.tagName,
       inputValue: e.target.value,
