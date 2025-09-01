@@ -98,7 +98,7 @@ export async function getAllProducts(signal?: AbortSignal): Promise<SearchRespon
     const productsResponse = await fetchProducts({ limit: 50 }, signal);
     
     // Convert to SearchResponse format
-    const items: ProductItem[] = productsResponse.products.map(convertProductToProductItem);
+    const items: ProductItem[] = productsResponse.products.map(product => convertProductToProductItem(product, false));
     
     return {
       query: "",
@@ -216,12 +216,14 @@ export async function searchProducts(query: string = "", signal?: AbortSignal): 
         item.description.toLowerCase().includes(queryLower)
       );
       
-      return {
+      const mockResponse = {
         query,
         isPalindrome: isPalindrome(query),
         items: filteredItems,
         totalItems: filteredItems.length
       };
+      
+      return applyPalindromeProcessing(mockResponse);
     }
     throw new ApiClientError('API base URL not configured', 500, 'Configuration Error');
   }
@@ -287,7 +289,9 @@ export async function searchProducts(query: string = "", signal?: AbortSignal): 
       );
     }
 
-    return data as SearchResponse;
+    // Apply palindrome processing if needed
+    const processedData = applyPalindromeProcessing(data as SearchResponse);
+    return processedData;
 
   } catch (error) {
     // Clear timeout on any error
@@ -318,12 +322,14 @@ export async function searchProducts(query: string = "", signal?: AbortSignal): 
             item.description.toLowerCase().includes(queryLower)
           );
           
-          return {
+          const mockResponse = {
             query,
             isPalindrome: isPalindrome(query),
             items: filteredItems,
             totalItems: filteredItems.length
           };
+          
+          return applyPalindromeProcessing(mockResponse);
         }
         
         throw new ApiClientError(
@@ -349,12 +355,14 @@ export async function searchProducts(query: string = "", signal?: AbortSignal): 
         item.description.toLowerCase().includes(queryLower)
       );
       
-      return {
+      const mockResponse = {
         query,
         isPalindrome: isPalindrome(query),
         items: filteredItems,
         totalItems: filteredItems.length
       };
+      
+      return applyPalindromeProcessing(mockResponse);
     }
 
     throw new ApiClientError(
@@ -523,16 +531,61 @@ export async function fetchProducts(
 }
 
 /**
- * Helper function to convert Product to ProductItem
+ * Apply palindrome processing to search response
+ * Ensures proper discounts and images for palindrome searches
  */
-export function convertProductToProductItem(product: Product): ProductItem {
+function applyPalindromeProcessing(response: SearchResponse): SearchResponse {
+  if (!response.isPalindrome) {
+    // For non-palindrome searches, just ensure all items have images
+    return {
+      ...response,
+      items: response.items.map(item => ({
+        ...item,
+        imageUrl: item.imageUrl || `https://picsum.photos/400/300?random=${item.id}`
+      }))
+    };
+  }
+
+  // For palindrome searches, apply discounts and ensure images
+  return {
+    ...response,
+    items: response.items.map(item => {
+      const hasDiscount = item.discountPercentage !== undefined && item.finalPrice < item.originalPrice;
+      
+      if (!hasDiscount) {
+        // Apply 50% discount if not already applied by backend
+        return {
+          ...item,
+          finalPrice: item.originalPrice * 0.5,
+          discountPercentage: 50,
+          imageUrl: item.imageUrl || `https://picsum.photos/400/300?random=${item.id}`
+        };
+      }
+      
+      // Just ensure image is present
+      return {
+        ...item,
+        imageUrl: item.imageUrl || `https://picsum.photos/400/300?random=${item.id}`
+      };
+    })
+  };
+}
+export function convertProductToProductItem(product: Product, isPalindrome: boolean = false): ProductItem {
+  // Generate a fallback image if no imageUrl is provided
+  const fallbackImageUrl = `https://picsum.photos/400/300?random=${product.id}`;
+  
+  const originalPrice = parseFloat(product.price);
+  const finalPrice = isPalindrome ? originalPrice * 0.5 : originalPrice; // 50% discount for palindromes
+  const discountPercentage = isPalindrome ? 50 : undefined;
+  
   return {
     id: product.id,
     title: product.title,
     brand: product.brand,
     description: product.description,
-    originalPrice: parseFloat(product.price),
-    finalPrice: parseFloat(product.price),
-    ...(product.imageUrl && { imageUrl: product.imageUrl }) // Solo incluir imageUrl si existe
+    originalPrice,
+    finalPrice,
+    ...(discountPercentage && { discountPercentage }),
+    imageUrl: product.imageUrl || fallbackImageUrl // Siempre asegurar que haya una imagen
   };
 }
