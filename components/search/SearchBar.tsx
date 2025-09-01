@@ -261,7 +261,7 @@ export default function SearchBar({
               ref={inputRef}
               id="search-input"
               data-testid="search-input"
-              type="search"
+              type="text"
               value={value}
               onChange={handleInputChange}
               onKeyDown={handleKeyDownDebug}
