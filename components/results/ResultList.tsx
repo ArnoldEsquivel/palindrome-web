@@ -1,11 +1,12 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import type { ProductItem, SearchResponse } from '@/lib/types';
 import ProductCard, { CompactProductCard, FeaturedProductCard } from './ProductCard';
 import LoadingSkeleton from '@/components/feedback/LoadingSkeleton';
 import EmptyState from '@/components/feedback/EmptyState';
 import ErrorState from '@/components/feedback/ErrorState';
+import { useConfetti } from '@/lib/useConfetti';
 
 /**
  * Props for ResultList component
@@ -69,6 +70,29 @@ export default function ResultList({
   onProductClick,
   onSuggestionClick
 }: ResultListProps) {
+
+  // Initialize confetti hook
+  const { triggerPalindromeConfetti, prefersReducedMotion } = useConfetti();
+
+  // Trigger confetti when palindrome is detected with results
+  useEffect(() => {
+    if (data?.isPalindrome && 
+        status === 'success' && 
+        data.items && 
+        data.items.length > 0 && 
+        !prefersReducedMotion) {
+      
+      console.log('🎊 [ResultList] Palindrome detected with results, triggering confetti!');
+      
+      // Add a small delay to ensure the UI has rendered
+      const timeoutId = setTimeout(() => {
+        triggerPalindromeConfetti();
+      }, 300);
+
+      // Cleanup timeout if component unmounts
+      return () => clearTimeout(timeoutId);
+    }
+  }, [data?.isPalindrome, status, data?.items, triggerPalindromeConfetti, prefersReducedMotion]);
 
   // Grid layout classes
   const gridClasses = {
